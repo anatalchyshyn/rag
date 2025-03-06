@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: chromadb
+    restart: always
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/.chroma
+
+  app:
+    build: .
+    container_name: rag_app
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - chromadb
+    environment:
+      - CHROMADB_HOST=chromadb
+      - CHROMADB_PORT=8000
+
+volumes:
+  chroma_data:

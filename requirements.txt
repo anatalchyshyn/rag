@@ -1,0 +1,6 @@
+langchain
+gpt4all
+langchain-chroma
+pypdf
+langchain_community
+requests
