@@ -8,7 +8,9 @@ RUN mkdir -p /app/files
 
 COPY mylife.zip /app/mylife.zip
 COPY app.py /app/app.py
-RUN unzip /app/mylife.zip -d /app/files
+COPY requirements.txt /app/requirements.txt
 
+RUN unzip /app/mylife.zip -d /app/files
+RUN pip install -r requirements.txt
 
 CMD ["python", "app.py"]
