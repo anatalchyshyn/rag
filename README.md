@@ -30,11 +30,3 @@ Docker (optional, for containerized deployment)
 
 OVHCloud storage account (for persistence)
 
-Clone the Repository
-
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
-
-Install Dependencies
-
-pip install -r requirements.txt
