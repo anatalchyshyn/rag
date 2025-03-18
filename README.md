@@ -1,10 +1,10 @@
-###RAG Model Implementation
+### RAG Model Implementation
 
-####Overview
+#### Overview
 
 This repository contains an implementation of a Retrieval-Augmented Generation (RAG) Model using LangChain, ChromaDB, and FastAPI. The model allows users to query contract documents by their contract number, retrieving relevant information from stored PDFs and generating responses using an LLM.
 
-####Features
+#### Features
 
 PDF Processing: Extracts text from PDF documents stored in contract folders.
 
@@ -20,7 +20,7 @@ FastAPI & Gradio: Provides a user-friendly web interface to input contract numbe
 
 Persistence: Saves and loads vector data from an OVHCloud S3 bucket for efficiency.
 
-####Installation
+#### Installation
 
 Prerequisites
 
