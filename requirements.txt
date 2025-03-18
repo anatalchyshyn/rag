@@ -1,6 +1,12 @@
-langchain
-gpt4all
-langchain-chroma
-pypdf
+langchain_chroma
+chromadb
 langchain_community
-requests
+langchain_text_splitters
+gpt4all
+pypdf
+langchain-openai
+typing_extensions
+gradio
+langchain_core
+langgraph
+boto3
