@@ -1,0 +1,88 @@
+import gradio as gr
+import os
+import chromadb
+from langchain_chroma import Chroma
+from langchain_community.embeddings import GPT4AllEmbeddings
+from langchain_core.documents import Document
+from langgraph.graph import START, StateGraph
+from typing_extensions import List, TypedDict
+from langchain_openai import ChatOpenAI
+
+CHROMA_DB_DIR = "contracts_db"
+
+embeddings = GPT4AllEmbeddings()
+chroma_client = chromadb.PersistentClient(CHROMA_DB_DIR)
+collection = chroma_client.get_or_create_collection(name="contracts",)
+
+vector_store_from_client = Chroma(
+    client=chroma_client,
+    persist_directory=CHROMA_DB_DIR,
+    collection_name="contracts",
+    embedding_function=embeddings,
+)
+
+llm = ChatOpenAI(api_key=OPENAI_API_KEY,
+                 temperature=0,
+                 model='gpt-4o-mini')
+
+CONTRACT_FOLDER = "../mylife/mylife"
+
+valid_contracts = os.listdir("CONTRACT_FOLDER")
+contract_state = gr.State("")
+
+def check_contract(contract_number):
+    """Check if the contract number is correct or not"""
+    if contract_number in valid_contracts:
+        return gr.update(visible=False), gr.update(visible=True), "", contract_number  # Store contract
+    else:
+        return gr.update(visible=True), gr.update(visible=False), "Invalid contract number. Try again.", ""
+
+def chatbot_response(message, history, contract_number):
+    """Main function of generation process"""
+    retrieved_docs = vector_store_from_client.similarity_search(
+        message,
+        k = 2,
+        filter={"contract_number": contract_number})
+
+    docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
+    meta_data = [doc.metadata for doc in retrieved_docs]
+    prompt = f"""
+    You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. 
+    If you don't know the answer, just say that you don't know. Use five sentences maximum and keep the answer concise.
+    Put metadata (pdf filename) after the answer as the context for answer.
+    
+    Question: {message} 
+    
+    Context: {docs_content} 
+    
+    Metadata: {meta_data}
+    
+    Answer:
+    """
+    response = llm.invoke(prompt)
+
+    return response.content
+
+"""Gradio interface"""
+with gr.Blocks() as app:
+    gr.Markdown("# Contract-Based Chatbot")
+
+    with gr.Row(visible=True) as contract_section:
+        contract_input = gr.Textbox(label="Enter Contract Number")
+        submit_button = gr.Button("Submit")
+
+    error_msg = gr.Textbox(label="Error", interactive=False, visible=False)
+
+    with gr.Row(visible=False) as chat_section:
+        chat_ui = gr.ChatInterface(
+            fn=chatbot_response,
+            additional_inputs=[contract_state]
+        )
+
+    submit_button.click(
+        check_contract,
+        inputs=[contract_input],
+        outputs=[contract_section, chat_section, error_msg, contract_state]
+    )
+
+app.launch(port=5000)
